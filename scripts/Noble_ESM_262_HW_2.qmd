@@ -1,0 +1,63 @@
+---
+title: "ESM 262 HW 2"
+author: "Wesley Noble"
+format: 
+  html:
+    code-folding: show
+    embed-resources: true
+    fig-width: 10
+execute:
+  warning: false
+  message: false
+---
+### Libraries
+
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+library(janitor)
+```
+
+### Data
+
+- **Dataset summary**: The Automatic Identification System (AIS) dataset provides real-time vessel tracking data collected from maritime transponders. This dataset, obtained from the NOAA Office for Coastal Management, contains ship movement records for July 23, 2020, across U.S. waters. It includes key variables such as latitude, longitude, timestamp, vessel MMSI (Maritime Mobile Service Identity), speed, course, and vessel type. AIS data is widely used for marine traffic analysis, environmental monitoring, and maritime safety assessments.
+- **Citation**: NOAA Office for Coastal Management. (2020). Automatic Identification System (AIS) Data - July 23, 2020 [Data set]. U.S. Department of Commerce. Retrieved from NOAA AIS Data Handler.
+- **More information and metadata**: <https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2020/index.html>
+
+```{r}
+AIS_data = read.csv(here("data", "AIS_2020_07_23.csv"))
+
+AIS_data_clean <- AIS_data |>
+  mutate(
+    Date = as.Date(BaseDateTime),
+    Time = format(as.POSIXct(BaseDateTime, format = "%Y-%m-%dT%H:%M:%S"), "%H:%M:%S")
+  ) |>
+  clean_names()
+
+#filter data to just 1 ship
+AIS_ex <- AIS_data_clean |>
+  filter(mmsi == 338354742)
+```
+
+### Testing AIS Function
+
+```{r}
+# Load the AIS to Line function from external script
+source("AIS_to_line.R")
+
+# Example usage of the AIS to Line function
+ship_tracks <- convert_ais_to_lines(AIS_ex)
+
+# Plot the resulting ship tracks
+ship_plot = ggplot() +
+  geom_sf(data = ship_tracks, color = "blue") +
+  theme_minimal()
+
+ship_plot
+
+# Now converting AIS to line for all AIS data
+all_ship_tracks <- convert_ais_to_lines(AIS_data_clean)
+
+```
+
