@@ -38,6 +38,8 @@ AIS_data_clean <- AIS_data |>
 #filter data to just 1 ship
 AIS_ex <- AIS_data_clean |>
   filter(mmsi == 338354742)
+
+write_csv(AIS_ex, here("data", "AIS_ex.csv"))
 ```
 
 ### Testing AIS Function
